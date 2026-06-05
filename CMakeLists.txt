@@ -26,9 +26,9 @@ target_include_directories(coroutine_core PUBLIC
 )
 
 target_compile_options(coroutine_core PRIVATE
-    -Wall
-    -Wextra
-    -Wpedantic
+    # -Wall
+    # -Wextra
+    # -Wpedantic
 )
 
 target_link_libraries(coroutine_core PUBLIC

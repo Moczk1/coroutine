@@ -34,7 +34,7 @@ namespace moczkrin
 
             // enum 表示 任务的具体事件类型。
             // 用 bit 分别表示不同的类型，所以同一fd可能有多种事件
-            Event events;
+            Event events = NONE;
 
             std::mutex mutex;
 
@@ -71,6 +71,7 @@ namespace moczkrin
                 {
                     eventContext.scheduler->scheduleLock(eventContext.fiber_ptr);
                 }
+                resetEventContext(eventContext);
             }
         };
 
