@@ -1,8 +1,6 @@
-#clang++ *.cc ../fiber/fiber.cc ../thread/thread.cc ../scheduler/scheduler.cc ../timer/timer.cc -std=c++23 -I../fiber -I../thread -I../scheduler -I../timer -o a
-
 cmake_minimum_required(VERSION 3.21)
 
-project(coroutine LANGUAGES CXX)
+project(coroutine)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
