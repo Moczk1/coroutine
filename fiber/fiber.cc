@@ -194,6 +194,7 @@ namespace moczkrin
         auto raw_ptr = curr.get();
         curr.reset();
         raw_ptr->yield();
+        assert(false); // 理论上不应该执行到这里
     }
 
 }

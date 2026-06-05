@@ -1,6 +1,3 @@
-
-
-// #include "hook.h"
 #include "fiber.h"
 #include "thread.h"
 
@@ -34,6 +31,7 @@ namespace moczkrin
         {
             bool need_tickle;
             {
+                
                 std::lock_guard<std::mutex> lock(m_mutex);
                 // empty ->  all thread is idle -> need to be
                 // waken up
