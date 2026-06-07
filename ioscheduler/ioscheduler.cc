@@ -253,7 +253,7 @@ namespace moczkrin
         return true;
     }
 
-    IOManager *GetThis()
+    IOManager *IOManager::GetThis()
     {
         return dynamic_cast<IOManager*>(Scheduler::GetThis());
     }

@@ -1,0 +1,2 @@
+/usr/sbin/ar qc libcoroutine_core.a CMakeFiles/coroutine_core.dir/thread/thread.cc.o CMakeFiles/coroutine_core.dir/fiber/fiber.cc.o CMakeFiles/coroutine_core.dir/scheduler/scheduler.cc.o CMakeFiles/coroutine_core.dir/timer/timer.cc.o CMakeFiles/coroutine_core.dir/ioscheduler/ioscheduler.cc.o CMakeFiles/coroutine_core.dir/hook/hook.cc.o CMakeFiles/coroutine_core.dir/hook/fd_manager.cc.o
+/usr/sbin/ranlib libcoroutine_core.a

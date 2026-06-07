@@ -30,7 +30,7 @@ void func2()
 
 int main(int argc, char const *argv[])
 {
-	IOManager manager(3);
+	IOManager manager(1);
 
 
 	sock = socket(AF_INET, SOCK_STREAM, 0);

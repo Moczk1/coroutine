@@ -1,0 +1,1 @@
+/usr/sbin/c++ -Wl,--dependency-file=CMakeFiles/ioscheduler_test.dir/link.d CMakeFiles/ioscheduler_test.dir/ioscheduler/test.cc.o -o ioscheduler_test  libcoroutine_core.a

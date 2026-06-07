@@ -13,8 +13,6 @@ namespace moczkrin
     {
         friend class TimerManager;
 
-
-
     private:
         bool m_recurring = false;
         uint64_t m_timespan;

@@ -13,7 +13,9 @@ add_library(coroutine_core
     fiber/fiber.cc
     scheduler/scheduler.cc
     timer/timer.cc
-    iomanager/ioscheduler.cc
+    ioscheduler/ioscheduler.cc
+    hook/hook.cc
+    hook/fd_manager.cc
 )
 
 target_include_directories(coroutine_core PUBLIC
@@ -22,55 +24,64 @@ target_include_directories(coroutine_core PUBLIC
     ${PROJECT_SOURCE_DIR}/fiber
     ${PROJECT_SOURCE_DIR}/scheduler
     ${PROJECT_SOURCE_DIR}/timer
-    ${PROJECT_SOURCE_DIR}/iomanager
+    ${PROJECT_SOURCE_DIR}/ioscheduler
+    ${PROJECT_SOURCE_DIR}/hook
 )
 
 target_compile_options(coroutine_core PRIVATE
-    # -Wall
-    # -Wextra
-    # -Wpedantic
+    -Wall
+    -Wextra
+    -Wpedantic
 )
 
 target_link_libraries(coroutine_core PUBLIC
     Threads::Threads
 )
 
-# add_executable(thread_test
-#     thread/main.cc
-# )
-
-# target_link_libraries(thread_test PRIVATE
-#     coroutine_core
-# )
-
-# add_executable(fiber_test
-#     fiber/test.cc
-# )
-
-# target_link_libraries(fiber_test PRIVATE
-#     coroutine_core
-# )
-
-# add_executable(scheduler_test
-#     scheduler/test.cc
-# )
-
-# target_link_libraries(scheduler_test PRIVATE
-#     coroutine_core
-# )
-
-# add_executable(timer_test
-#     timer/test.cc
-# )
-
-# target_link_libraries(timer_test PRIVATE
-#     coroutine_core
-# )
-
-add_executable(iomanager_test
-    iomanager/test.cc
+add_executable(thread_test
+    thread/test.cc
 )
 
-target_link_libraries(iomanager_test PRIVATE
+target_link_libraries(thread_test PRIVATE
+    coroutine_core
+)
+
+add_executable(fiber_test
+    fiber/test.cc
+)
+
+target_link_libraries(fiber_test PRIVATE
+    coroutine_core
+)
+
+add_executable(scheduler_test
+    scheduler/test.cc
+)
+
+target_link_libraries(scheduler_test PRIVATE
+    coroutine_core
+)
+
+add_executable(timer_test
+    timer/test.cc
+)
+
+target_link_libraries(timer_test PRIVATE
+    coroutine_core
+)
+
+add_executable(ioscheduler_test
+    ioscheduler/test.cc
+)
+
+target_link_libraries(ioscheduler_test PRIVATE
+    coroutine_core
+)
+
+add_executable(hook_test
+    hook/test.cc
+)
+
+target_link_libraries(hook_test PRIVATE
     coroutine_core
 )
