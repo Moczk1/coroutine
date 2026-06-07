@@ -1,9 +1,0 @@
-/home/moczkrin/mycode/coroutine/build/CMakeFiles/coroutine_core.dir
-/home/moczkrin/mycode/coroutine/build/CMakeFiles/thread_test.dir
-/home/moczkrin/mycode/coroutine/build/CMakeFiles/fiber_test.dir
-/home/moczkrin/mycode/coroutine/build/CMakeFiles/scheduler_test.dir
-/home/moczkrin/mycode/coroutine/build/CMakeFiles/timer_test.dir
-/home/moczkrin/mycode/coroutine/build/CMakeFiles/ioscheduler_test.dir
-/home/moczkrin/mycode/coroutine/build/CMakeFiles/hook_test.dir
-/home/moczkrin/mycode/coroutine/build/CMakeFiles/edit_cache.dir
-/home/moczkrin/mycode/coroutine/build/CMakeFiles/rebuild_cache.dir
