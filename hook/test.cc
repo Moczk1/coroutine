@@ -53,7 +53,13 @@ void test_accept()
                     //std::cout << "received data, fd = " << fd << ", data = " << buffer << std::endl;
                     
                     // 构建HTTP响应
-                    const char *response = "HTTP/1.1 200 OK\r\n"
+                    // const char *response = "HTTP/1.1 200 OK\r\n"
+                    //                        "Content-Type: text/plain\r\n"
+                    //                        "Content-Length: 13\r\n"
+                    //                        "Connection: keep-alive\r\n"
+                    //                        "\r\n"
+                    //                        "Hello, World!";
+                    std::string response= "HTTP/1.1 200 OK\r\n"
                                            "Content-Type: text/plain\r\n"
                                            "Content-Length: 13\r\n"
                                            "Connection: keep-alive\r\n"
@@ -61,7 +67,7 @@ void test_accept()
                                            "Hello, World!";
                     
                     // 发送HTTP响应
-                    ret = send(fd, response, strlen(response), 0);
+                    ret = send(fd, response.c_str(), strlen(response.c_str()), 0);
                    // std::cout << "sent data, fd = " << fd << ", ret = " << ret << std::endl;
 
                     // 关闭连接
@@ -92,6 +98,8 @@ void test_iomanager()
     int portno = 8080;
     struct sockaddr_in server_addr, client_addr;
     socklen_t client_len = sizeof(client_addr);
+
+    // moczkrin::set_hook_enable(true);
 
     // 设置套接字
     sock_listen_fd = socket(AF_INET, SOCK_STREAM, 0);

@@ -56,7 +56,7 @@ namespace moczkrin
 
         // test
         is_inited = true;
-
+        std::cout << "hook_init opened!" << std::endl;
 // assignment -> sleep_f = (sleep_fun)dlsym(RTLD_NEXT, "sleep"); -> dlsym -> fetch the original symbols/function
 #define XX(name) name##_f = (name##_fun)dlsym(RTLD_NEXT, #name);
         HOOK_FUN(XX)
@@ -578,6 +578,18 @@ extern "C"
 
     int setsockopt(int sockfd, int level, int optname, const void *optval, socklen_t optlen)
     {
+
+        if (true)
+        {
+            if (moczkrin::t_hook_enable)
+            {
+                std::cout << "moczkrin::t_hook_enable" << std::endl;
+            }
+            else
+            {
+                std::cout << "moczkrin::t_hook_enable fasle" << std::endl;
+            }
+        }
         if (!moczkrin::t_hook_enable)
         {
             return setsockopt_f(sockfd, level, optname, optval, optlen);
