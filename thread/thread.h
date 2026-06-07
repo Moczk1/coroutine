@@ -1,15 +1,19 @@
-#ifndef _THREAD_H_
-#define _THREAD_H_
+#pragma once
 
 #include <mutex>
 #include <condition_variable>
 #include <functional>
 #include <string>
-#include <thread> // 引入 std::thread
+#include <thread>
+#include <iostream>
 
 namespace moczkrin
 {
 
+    /**
+     * control thread creation process.
+     * stick to create a Thread instance then run it.
+     */
     class Semaphore
     {
     private:
@@ -38,32 +42,59 @@ namespace moczkrin
         }
     };
 
+    /**
+     * Creations on the heap are non-movable.
+     */
     class Thread
     {
     public:
+        // constructor and destructor
         Thread(std::function<void()> cb, const std::string &name);
         ~Thread();
+        Thread(const Thread &other)
+        {
+            std::cout << "construction copy function called" << std::endl;
+            m_id = other.getId();
+        }
+
+        /**
+         * ordinary member functions
+         */
         pid_t getId() const { return m_id; }
         const std::string &getName() const { return m_name; }
         void join();
 
     public:
+        /**
+         *  get and set variables in thread exclusive space.
+         *  -----------
+         *  static thread_local Thread *t_thread = nullptr;
+         *  static thread_local std::string t_thread_name = "UNKNOWN";
+         *  ---------------
+         */
         static pid_t GetThreadId();
         static Thread *GetThis();
         static const std::string &GetName();
         static void SetName(const std::string &name);
 
     private:
-        static void run(Thread *thread); // 签名简化：直接传入类指针，不再需要 void*
+        // Thread entry. We will run m_cb func in this function inside.
+        static void run(Thread *thread);
 
     private:
+        // system allocates
         pid_t m_id = -1;
-        std::thread m_thread; // 替换为 std::thread
+
+        // C++ thread instance
+        std::thread m_thread;
+
+        // real need to be executed function
         std::function<void()> m_cb;
+
+        // Thread instance's name
         std::string m_name;
+
         Semaphore m_semaphore;
     };
 
 }
-
-#endif

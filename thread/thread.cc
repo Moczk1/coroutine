@@ -3,8 +3,12 @@
 #include <iostream>
 #include <unistd.h>
 
+
+
 namespace moczkrin
 {
+
+    const bool thread_debug_option = false;
 
     static thread_local Thread *t_thread = nullptr;
     static thread_local std::string t_thread_name = "UNKNOWN";
@@ -19,11 +23,6 @@ namespace moczkrin
         return t_thread;
     }
 
-    const std::string &Thread::GetName()
-    {
-        return t_thread_name;
-    }
-
     void Thread::SetName(const std::string &name)
     {
         if (t_thread)
@@ -33,9 +32,17 @@ namespace moczkrin
         t_thread_name = name;
     }
 
-    // 构造函数重构
+    const std::string &Thread::GetName()
+    {
+        return t_thread_name;
+    }
+
+    
     Thread::Thread(std::function<void()> cb, const std::string &name) : m_cb(cb), m_name(name)
     {
+        if (thread_debug_option)
+            std::cout << "Construction function called!" << std::endl;
+    
         // std::thread 直接接收静态成员函数和参数
         // 注意：由于 std::thread 可能会抛出异常，这里可以使用 try-catch 捕获
         try
@@ -48,7 +55,7 @@ namespace moczkrin
             throw std::logic_error("thread create error");
         }
 
-        // 等待线程函数完成初始化（保留原框架的同步逻辑）
+        // 等待线程函数完成初始化
         m_semaphore.wait();
     }
 
@@ -69,6 +76,8 @@ namespace moczkrin
         {
             try
             {
+                if(thread_debug_option)
+                    std::cout << "Thread join() called!" << std::endl;
                 m_thread.join();
             }
             catch (const std::exception &e)
@@ -82,9 +91,10 @@ namespace moczkrin
     // 线程运行函数重构
     void Thread::run(Thread *thread)
     {
-        t_thread = thread;
-        t_thread_name = thread->m_name;
-        thread->m_id = GetThreadId();
+        t_thread        = thread;
+        t_thread_name   = thread->m_name;
+        
+        thread->m_id    = GetThreadId();
 
         // Linux 下依然可以使用 pthread_setname_np 命名
         // 现代 C++ 提供了 native_handle() 拿到底层的 pthread_t

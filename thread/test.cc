@@ -11,19 +11,21 @@ void func()
     std::cout << "id: " << Thread::GetThreadId() << ", name: " << Thread::GetName();
     std::cout << ", this id: " << Thread::GetThis()->getId() << ", this name: " << Thread::GetThis()->getName() << std::endl;
 
-    sleep(6);
+    sleep(1);
 }
 
 int main() {
     std::vector<std::shared_ptr<Thread>> thrs;
+    size_t size = 5;
+    thrs.reserve(size);
 
-    for(int i=0;i<5;i++)
+    for(int i=0;i<size;i++)
     {
         std::shared_ptr<Thread> thr = std::make_shared<Thread>(&func, "thread_"+std::to_string(i));
         thrs.push_back(thr);
     }
 
-    for(int i=0;i<5;i++)
+    for(int i=0;i<size;i++)
     {
         thrs[i]->join();
     }
