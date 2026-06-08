@@ -4,9 +4,9 @@
 #include <atomic>
 #include <functional>
 #include <cassert>
+#include <ucontext.h>
 #include <unistd.h>
 #include <mutex>
-#include <boost/context/detail/fcontext.hpp>
 
 namespace moczkrin
 {
@@ -55,7 +55,7 @@ namespace moczkrin
         static uint64_t GetFiberId();
 
         // 协程函数
-        static void MainFunc(boost::context::detail::transfer_t trans);
+        static void MainFunc();
 
     private:
         // id
@@ -64,18 +64,14 @@ namespace moczkrin
         uint32_t m_stacksize = 0;
         // 协程状态
         State m_state = READY;
-        // // 协程上下文
-        // ucontext_t m_ctx;
-
-        boost::context::detail::fcontext_t m_ctx2 = nullptr;
-        boost::context::detail::transfer_t m_trans;
-
-        // 协程栈 malloc 返回的原始地址，析构时必须释放这个地址
+        // 协程上下文
+        ucontext_t m_ctx;
+        // 协程栈指针
         void *m_stack = nullptr;
         // 协程函数
         std::function<void()> m_cb;
         // 是否让出执行权交给调度协程
-        bool m_runInScheduler = true;
+        bool m_runInScheduler;
 
     public:
         std::mutex m_mutex;
