@@ -1,7 +1,7 @@
 #include "fiber.h"
 #include <vector>
 
-using namespace moczkrin; 
+using namespace moczkrin;
 
 class Scheduler
 {
@@ -19,15 +19,15 @@ public:
 
 		std::shared_ptr<Fiber> task;
 		auto it = m_tasks.begin();
-		while(it!=m_tasks.end())
+		while (it != m_tasks.end())
 		{
-				// 迭代器本身也是指针
+			// 迭代器本身也是指针
 			task = *it;
 			// 由主协程切换到子协程，子协程函数运行完毕后自动切换到主协程
 			task->resume();
 			it++;
 		}
-		m_tasks.clear(); 
+		m_tasks.clear();
 	}
 
 private:
@@ -49,11 +49,11 @@ int main()
 	Scheduler sc;
 
 	// 添加调度任务（任务和子协程绑定）
-	for(auto i=0;i<20;i++)
+	for (auto i = 0; i < 20; i++)
 	{
 		// 创建子协程
-			// 使用共享指针自动管理资源 -> 过期后自动释放子协程创建的资源
-			// bind函数 -> 绑定函数和参数用来返回一个函数对象
+		// 使用共享指针自动管理资源 -> 过期后自动释放子协程创建的资源
+		// bind函数 -> 绑定函数和参数用来返回一个函数对象
 		std::shared_ptr<Fiber> fiber = std::make_shared<Fiber>(std::bind(test_fiber, i), 0, false);
 		sc.schedule(fiber);
 	}
