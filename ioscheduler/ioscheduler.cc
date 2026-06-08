@@ -105,7 +105,7 @@ namespace moczkrin
 
         if (fd_ptr->events & event)
         {
-            // fd event 不为空，且添加进来的事务和原先重复
+            // 添加进来的事务和原先重复
             return -1;
         }
 
@@ -161,7 +161,7 @@ namespace moczkrin
         }
 
 
-        std::unique_lock<std::mutex> lokc(fd_ptr->mutex);
+        std::unique_lock<std::mutex> lock(fd_ptr->mutex);
 
         
         bool exist = fd_ptr->events & event;
@@ -173,9 +173,9 @@ namespace moczkrin
         fd_ptr->events = (Event)(fd_ptr->events & ~event);
 
         epoll_event epevent;
-        int op = fd_ptr->events ? EPOLL_CTL_MOD : EPOLL_CTL_DEL;
-        epevent.events = EPOLLET | fd_ptr->events;
-        epevent.data.ptr = fd_ptr;
+        int op              = fd_ptr->events ? EPOLL_CTL_MOD : EPOLL_CTL_DEL;
+        epevent.events      = EPOLLET | fd_ptr->events;
+        epevent.data.ptr    = fd_ptr;
 
         if (epoll_ctl(m_epfd, op, fd, &epevent))
         {
@@ -183,7 +183,7 @@ namespace moczkrin
             return -1;
         }
 
-        m_pendingEventsCount --;
+        m_pendingEventsCount.fetch_sub(1);
 
         FdContext::EventContext& event_ctx = fd_ptr->getEventContext(event);
         fd_ptr->resetEventContext(event_ctx);
@@ -200,7 +200,7 @@ namespace moczkrin
         fd_ptr = m_fdContexts[fd];
         read_lock.unlock();
 
-        std::unique_lock<std::mutex> lokc(fd_ptr->mutex);
+        std::unique_lock<std::mutex> lock(fd_ptr->mutex);
         if(fd_ptr == nullptr)
         {
             std::cerr << "cancelEvent delete fd: "  << fd << " failed: " << strerror(errno) << std::endl;

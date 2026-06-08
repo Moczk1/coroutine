@@ -1,5 +1,6 @@
 #include "scheduler.h"
 #include "sys/syscall.h"
+#include "hook.h"
 
 static bool debug = false;
 
@@ -100,7 +101,7 @@ namespace moczkrin
         if (debug)
             std::cout << "Schedule::run() starts in thread: " << thread_id << std::endl;
 
-        // set_hook_enable(true);
+        set_hook_enable(true);
 
         SetThis();
 

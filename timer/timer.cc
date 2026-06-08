@@ -100,6 +100,13 @@ namespace moczkrin
         return addTimer(ms, std::bind(&OnTimer, weak_cond, cb), recurring);
     }
 
+    /**
+     * 
+     * 
+     *  return 0xffffffffffffffff means times is empty()
+     *  return 0 已经发生了超时
+     *  normal return next cloest event in times.
+     */
     uint64_t TimerManager::getNextTimer()
     {
         std::shared_lock<std::shared_mutex> read_lock(m_mutex);
