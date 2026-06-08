@@ -24,13 +24,13 @@ namespace moczkrin
     }
 
     /**
-     * @brief For first time, create new Fiber instance, set three ptr to the same instance, 
+     * @brief For first time, create new Fiber instance, set three ptr to the same instance,
      *        and set state to RUNNING,
      * @return std::shared_ptr<Fiber> ： new create fiber or the inRunningFiber instance.
      */
     std::shared_ptr<Fiber> Fiber::GetThis()
     {
-        if(debug)
+        if (debug)
         {
             // std::cout << "s_fiber_id " << s_fiber_id << std::endl;
         }
@@ -65,22 +65,24 @@ namespace moczkrin
     /**
      * Empty constructor
      * Default settings for the RUNNING runtime state and context settings.
-     * 
+     *
      * 空构造
      * 默认设置 RUNNING 运行状态，并获得上下文保存到 m_ctx，
      * 由 GetThis() 调用
-     * 新调用的函数栈如未设置初 Fiber 对象则默认设置。 
+     * 新调用的函数栈如未设置初 Fiber 对象则默认设置。
      */
     Fiber::Fiber()
     {
         SetThis(this);
         m_state = RUNNING;
+        // if (boost::context::detail::make_fcontext())
+        m_ctx2 = nullptr;
 
-        if (getcontext(&m_ctx))
-        {
-            std::cerr << "Fiber() failed\n";
-            pthread_exit(NULL);
-        }
+        // if (getcontext(&m_ctx))
+        // {
+        //     std::cerr << "Fiber() failed\n";
+        //     pthread_exit(NULL);
+        // }
 
         m_id = s_fiber_id.fetch_add(1);
         s_fiber_count.fetch_add(1);
@@ -102,16 +104,19 @@ namespace moczkrin
         m_stacksize = stacksize ? stacksize : 128000;
         m_stack = malloc(m_stacksize);
 
-        if (getcontext(&m_ctx))
-        {
-            std::cerr << "Fiber(std::function<void()> cb, size_t stacksize, bool run_in_scheduler) failed\n";
-            pthread_exit(NULL);
-        }
+        // if (getcontext(&m_ctx))
+        // {
+        //     std::cerr << "Fiber(std::function<void()> cb, size_t stacksize, bool run_in_scheduler) failed\n";
+        //     pthread_exit(NULL);
+        // }
 
-        m_ctx.uc_link = nullptr;
-        m_ctx.uc_stack.ss_sp = m_stack;
-        m_ctx.uc_stack.ss_size = m_stacksize;
-        makecontext(&m_ctx, &Fiber::MainFunc, 0);
+        void *stack_top = static_cast<char *>(m_stack) + m_stacksize;
+        m_ctx2 = boost::context::detail::make_fcontext(stack_top, m_stacksize, &Fiber::MainFunc);
+
+        // m_ctx.uc_link = nullptr;
+        // m_ctx.uc_stack.ss_sp = m_stack;
+        // m_ctx.uc_stack.ss_size = m_stacksize;
+        // makecontext(&m_ctx, &Fiber::MainFunc, 0);
 
         m_id = s_fiber_id.fetch_add(1);
         s_fiber_count.fetch_add(1);
@@ -120,7 +125,7 @@ namespace moczkrin
     }
 
     /**
-     * descturctor 
+     * descturctor
      *        atomic variables s_fiber_count 自减；
      *        释放进程在堆上为协程分配的栈空间
      */
@@ -137,7 +142,7 @@ namespace moczkrin
 
     /**
      * 重置 Fiber 对象的 state 状态 和 cb 函数指针
-     * 重新设置协程对象 Fiber 的上下文 
+     * 重新设置协程对象 Fiber 的上下文
      * @param cb 传入的函数指针。
      */
     void Fiber::reset(std::function<void()> cb)
@@ -146,20 +151,22 @@ namespace moczkrin
 
         m_state = READY;
         m_cb = cb;
+        void *stack_top = static_cast<char *>(m_stack) + m_stacksize;
+        m_ctx2 = boost::context::detail::make_fcontext(stack_top, m_stacksize, &Fiber::MainFunc);
 
-        if (getcontext(&m_ctx))
-        {
-            std::cerr << "reset() failed\n";
-            pthread_exit(NULL);
-        }
+        // if (getcontext(&m_ctx))
+        // {
+        //     std::cerr << "reset() failed\n";
+        //     pthread_exit(NULL);
+        // }
 
-        m_ctx.uc_link = nullptr;
-        m_ctx.uc_stack.ss_sp = m_stack;
-        m_ctx.uc_stack.ss_size = m_stacksize;
-        makecontext(&m_ctx, &Fiber::MainFunc, 0);
+        // m_ctx.uc_link = nullptr;
+        // m_ctx.uc_stack.ss_sp = m_stack;
+        // m_ctx.uc_stack.ss_size = m_stacksize;
+        // makecontext(&m_ctx, &Fiber::MainFunc, 0);
     }
 
-    /** 
+    /**
      * Fiber 协程对象被调度去运行的入口
      */
     void Fiber::resume()
@@ -168,24 +175,31 @@ namespace moczkrin
 
         m_state = RUNNING;
 
-        if (m_runInScheduler)
-        {
-            SetThis(this);
-            if (swapcontext(&(t_scheduler_fiber->m_ctx), &m_ctx))
-            {
-                std::cerr << "resume() to t_scheduler_fiber failed\n";
-                pthread_exit(NULL);
-            }
-        }
-        else
-        {
-            SetThis(this);
-            if (swapcontext(&(t_thread_fiber->m_ctx), &m_ctx))
-            {
-                std::cerr << "resume() to t_thread_fiber failed\n";
-                pthread_exit(NULL);
-            }
-        }
+        Fiber *resume_target_parent = m_runInScheduler ? t_scheduler_fiber : t_thread_fiber.get();
+
+        SetThis(this);
+        m_trans = boost::context::detail::jump_fcontext(m_ctx2, resume_target_parent);
+
+        m_ctx2 = m_trans.fctx;
+
+        // if (m_runInScheduler)
+        // {
+        //     SetThis(this);
+        //     if (swapcontext(&(t_scheduler_fiber->m_ctx), &m_ctx))
+        //     {
+        //         std::cerr << "resume() to t_scheduler_fiber failed\n";
+        //         pthread_exit(NULL);
+        //     }
+        // }
+        // else
+        // {
+        //     SetThis(this);
+        //     if (swapcontext(&(t_thread_fiber->m_ctx), &m_ctx))
+        //     {
+        //         std::cerr << "resume() to t_thread_fiber failed\n";
+        //         pthread_exit(NULL);
+        //     }
+        // }
     }
     /**
      * 交出CPU执行权限。
@@ -199,24 +213,31 @@ namespace moczkrin
             m_state = READY;
         }
 
-        if (m_runInScheduler)
-        {
-            SetThis(t_scheduler_fiber);
-            if (swapcontext(&m_ctx, &(t_scheduler_fiber->m_ctx)))
-            {
-                std::cerr << "yield() to to t_scheduler_fiber failed\n";
-                pthread_exit(NULL);
-            }
-        }
-        else
-        {
-            SetThis(t_thread_fiber.get());
-            if (swapcontext(&m_ctx, &(t_thread_fiber->m_ctx)))
-            {
-                std::cerr << "yield() to t_thread_fiber failed\n";
-                pthread_exit(NULL);
-            }
-        }
+        Fiber *yield_to_target = m_runInScheduler ? t_scheduler_fiber : t_thread_fiber.get();
+
+        SetThis(yield_to_target);
+
+        m_trans = boost::context::detail::jump_fcontext(yield_to_target->m_ctx2, nullptr);
+
+        yield_to_target->m_ctx2 = m_trans.fctx;
+        // if (m_runInScheduler)
+        // {
+        //     SetThis(t_scheduler_fiber);
+        //     if (swapcontext(&m_ctx, &(t_scheduler_fiber->m_ctx)))
+        //     {
+        //         std::cerr << "yield() to to t_scheduler_fiber failed\n";
+        //         pthread_exit(NULL);
+        //     }
+        // }
+        // else
+        // {
+        //     SetThis(t_thread_fiber.get());
+        //     if (swapcontext(&m_ctx, &(t_thread_fiber->m_ctx)))
+        //     {
+        //         std::cerr << "yield() to t_thread_fiber failed\n";
+        //         pthread_exit(NULL);
+        //     }
+        // }
     }
 
     /**
@@ -224,8 +245,13 @@ namespace moczkrin
      * 如在创建过程中，调用了 yield() 则不会更改 Fiber state 的位置。
      * Fiber 对象的运行将不会退出。
      */
-    void Fiber::MainFunc()
+    void Fiber::MainFunc(boost::context::detail::transfer_t trans)
     {
+
+        Fiber *caller = static_cast<Fiber *>(trans.data);
+
+        caller->m_ctx2 = trans.fctx;
+
         std::shared_ptr<Fiber> curr = GetThis();
         assert(curr != nullptr);
 
