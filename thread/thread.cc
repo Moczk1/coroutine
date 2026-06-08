@@ -8,7 +8,7 @@
 namespace moczkrin
 {
 
-    const bool thread_debug_option = false;
+    const bool thread_debug_option = true;
 
     static thread_local Thread *t_thread = nullptr;
     static thread_local std::string t_thread_name = "UNKNOWN";

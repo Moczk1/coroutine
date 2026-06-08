@@ -67,7 +67,7 @@ namespace moczkrin
      * Default settings for the RUNNING runtime state and context settings.
      * 
      * 空构造
-     * 默认设置 RUNNING 运行状态，并设置上下文
+     * 默认设置 RUNNING 运行状态，并获得上下文保存到 m_ctx，
      * 由 GetThis() 调用
      * 新调用的函数栈如未设置初 Fiber 对象则默认设置。 
      */
@@ -83,7 +83,7 @@ namespace moczkrin
         }
 
         m_id = s_fiber_id.fetch_add(1);
-        s_fiber_count++;
+        s_fiber_count.fetch_add(1);
         if (debug)
             std::cout << "Fiber(): main id = " << m_id << std::endl;
     }

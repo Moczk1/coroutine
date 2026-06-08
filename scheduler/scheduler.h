@@ -1,12 +1,15 @@
+#pragma once
 #include "fiber.h"
 #include "thread.h"
-
 #include <mutex>
 #include <vector>
 
 namespace moczkrin
 {
-
+    /**
+     * 多线程公用一个 scheduler 调度对象。
+     * 可提供后续继承自行更改内部实现
+     */
     class Scheduler
     {
     public:
@@ -25,7 +28,12 @@ namespace moczkrin
         void SetThis();
 
     public:
-        // 添加任务到任务队列
+        /**
+         * 添加任务到任务队列
+         * @param fc template<function or Fiber >
+         * @param thread 期望的执行函数逻辑的线程id
+         *  
+         */ 
         template <class FiberOrCb>
         void scheduleLock(FiberOrCb fc, int thread = -1)
         {
@@ -43,16 +51,17 @@ namespace moczkrin
                     m_tasks.push_back(task);
                 }
             }
-
+            // thread needs to be keep alive 
             if (need_tickle)
             {
                 tickle();
             }
         }
 
-        // 启动线程池
+        /**
+         * 对外暴露的两个方法。
+         */
         virtual void start();
-        // 关闭线程池
         virtual void stop();
 
     protected:
@@ -61,16 +70,17 @@ namespace moczkrin
         // 线程函数
         virtual void run();
 
-        // 空闲协程函数
+        // 空闲协程函数：可自行处理 空闲状态下 scheduler 的执行逻辑
         virtual void idle();
 
-        // 是否可以关闭
+        // 判断 scheduler 对象是否已经处于关闭的处理过程中。
         virtual bool stopping();
 
-        bool hasIdleThreads() { return m_idleThreadCount > 0; }
+        // 判断调度器是否
+        bool hasIdleThreads() const { return m_idleThreadCount > 0; }
 
     private:
-        // 任务
+        // 任务结构体
         struct ScheduleTask
         {
             std::shared_ptr<Fiber> fiber;
