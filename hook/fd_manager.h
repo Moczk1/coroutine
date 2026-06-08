@@ -1,6 +1,10 @@
+#pragma once
 #include <memory>
 #include <shared_mutex>
-#include "thread.h"
+#include <vector>
+#include <mutex>
+
+
 
 namespace moczkrin
 {
