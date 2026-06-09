@@ -115,7 +115,7 @@ namespace moczkrin
         epoll_event epevent{};
         // 第一次注册 fd 使用 ADD，已有事件时追加注册使用 MOD。
         int op           = old_events == NONE ? EPOLL_CTL_ADD : EPOLL_CTL_MOD;
-        epevent.events   = EPOLLET | new_events;
+        epevent.events   = static_cast<Event>(EPOLLET | (EPOLL_EVENTS)new_events);
         epevent.data.ptr = fd_ptr;
 
         // register and check
@@ -174,7 +174,7 @@ namespace moczkrin
 
         epoll_event epevent;
         int op              = fd_ptr->events ? EPOLL_CTL_MOD : EPOLL_CTL_DEL;
-        epevent.events      = EPOLLET | fd_ptr->events;
+        epevent.events      = static_cast<Event>(EPOLLET | static_cast<EPOLL_EVENTS>(fd_ptr->events));
         epevent.data.ptr    = fd_ptr;
 
         if (epoll_ctl(m_epfd, op, fd, &epevent))
@@ -220,7 +220,7 @@ namespace moczkrin
         // 内核标记中删除
         epoll_event epevent;
         int op              = newEvent ? EPOLL_CTL_MOD : EPOLL_CTL_DEL;
-        epevent.events      =  EPOLLET | newEvent;
+        epevent.events      =  static_cast<Event>(EPOLLET | static_cast<EPOLL_EVENTS>(newEvent));
         epevent.data.ptr    = fd_ptr;
         if(epoll_ctl(m_epfd, op, fd, &epevent))
         {

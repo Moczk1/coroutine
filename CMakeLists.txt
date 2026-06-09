@@ -90,45 +90,54 @@
 cmake_minimum_required(VERSION 3.31)
 project(my_coroutine VERSION 1.0.0 LANGUAGES CXX)
 
+set(CMAKE_COMPILE_WARNING_AS_ERROR ON) # 调试阶段可以先关闭
+
 # 设置 C++ 标准
 set(CMAKE_CXX_STANDARD 23) 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # 1. 收集所有子目录中的源文件（排除各个目录下的 test.cc）
-file(GLOB_RECURSE LIB_SOURCES 
-    "thread/thread.cc"
-    "fiber/fiber.cc"
-    "scheduler/scheduler.cc"
-    "ioscheduler/ioscheduler.cc"
-    "timer/timer.cc"
-    "hook/fd_manager.cc"
-    "hook/hook.cc"
+file(GLOB_RECURSE CORE_SOURCES 
+    "src/thread/thread.cc"
+    "src/fiber/fiber.cc"
+    "src/scheduler/scheduler.cc"
+    "src/ioscheduler/ioscheduler.cc"
+    "src/timer/timer.cc"
+    "src/hook/fd_manager.cc"
+    "src/hook/hook.cc"
 )
 
 # 2. 设置头文件包含路径，这样内部互相引用时比较方便
-# 让编译器去这几个子目录里寻找头文件
 include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/thread
-    ${CMAKE_CURRENT_SOURCE_DIR}/fiber
-    ${CMAKE_CURRENT_SOURCE_DIR}/scheduler
-    ${CMAKE_CURRENT_SOURCE_DIR}/ioscheduler
-    ${CMAKE_CURRENT_SOURCE_DIR}/timer
-    ${CMAKE_CURRENT_SOURCE_DIR}/hook
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 # 3. 核心：选择打包成动态库还是静态库（二选一，或者两个都建）
 
-# 选项 A：打包成动态链接库（libmy_coroutine.so）
-add_library(my_coroutine SHARED ${LIB_SOURCES})
+# # 选项 A：打包成动态链接库 .so
+# add_library(moczkrin_coroutine SHARED ${LIB_SOURCES})
 
-# # 选项 B：打包成静态链接库（libmy_coroutine.a）
-# add_library(my_coroutine STATIC ${LIB_SOURCES})
+# 选项 B：打包成静态链接库  .a
+add_library(moczkrin_coroutine STATIC ${CORE_SOURCES})
 
-# # 4. 如果你的安全/异步处理链接了系统 pthread 库
-# find_package(Threads REQUIRED)
-# target_link_libraries(my_coroutine PRIVATE Threads::Threads)
 
-# 5. 可选：如果你还想编译你原有的测试程序，可以这样写
-add_executable(test_fiber fiber/test.cc)
-target_link_libraries(test_fiber my_coroutine) # 让测试程序链接你刚生成的库
+# 测试程序
+add_executable(test_fiber src/fiber/test.cc)
+target_link_libraries(test_fiber moczkrin_coroutine) # 让测试程序链接你刚生成的库
+
+# foreach(MODULE ${MODULES})
+#     # 检查对应目录下是否存在 test.cc
+#     set(TEST_FILE "${PROJECT_SOURCE_DIR}/src/${MODULE}/test.cc")
+#     if(EXISTS ${TEST_FILE})
+#         # 定义可执行文件的名字，例如：test_fiber, test_scheduler
+#         set(TARGET_NAME "test_${MODULE}")
+        
+#         # 添加可执行文件
+#         add_executable(${TARGET_NAME} ${TEST_FILE})
+        
+#         # 链接核心库和线程库
+#         target_link_libraries(${TARGET_NAME} PRIVATE my_coroutine Threads::Threads)
+        
+#         message(STATUS "Created test target: ${TARGET_NAME}")
+#     endif()
+# endforeach()

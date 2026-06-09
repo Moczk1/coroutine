@@ -22,9 +22,9 @@ int main() {
     for(int i=0;i<size;i++)
     {
         std::shared_ptr<Thread> thr = std::make_shared<Thread>(&func, "thread_"+std::to_string(i));
-        thrs.push_back(thr);
+        thrs.emplace_back(thr);
     }
-
+    
     for(int i=0;i<size;i++)
     {
         thrs[i]->join();
