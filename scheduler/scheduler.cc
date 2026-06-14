@@ -27,16 +27,19 @@ namespace moczkrin
      */
     Scheduler::Scheduler(size_t threads, bool use_caller, const std::string &name) : m_useCaller(use_caller), m_name(name)
     {
-        assert(threads > 0 && Scheduler::GetThis() == nullptr);
+        assert(threads > 0 );
 
-        // scheduler 构造过程中设置
-        SetThis();
-
-        Thread::SetName(m_name);
-
+        
         // 使用主线程当作工作线程
         if (use_caller)
         {
+            assert(Scheduler::GetThis() == nullptr);
+            
+            // scheduler 构造过程中设置
+            SetThis();
+    
+            Thread::SetName(m_name);
+
             threads--;
             // 创建主协程
             Fiber::GetThis();
