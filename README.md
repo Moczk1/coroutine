@@ -160,6 +160,37 @@ cmake --build build
 ./build/test_fiber
 ```
 
+
+## Demo
+
+`demo_http_server` は、`Fiber`、`Scheduler`、`IOManager`、`epoll` の連携を確認するための小さな HTTP server です。  
+8080 port で接続を待ち受け、request ごとに実行 thread id と runtime の説明を返します。
+
+```bash
+./build/demo_http_server
+```
+
+別ターミナルから以下を実行します。
+
+```bash
+curl http://127.0.0.1:8080/
+```
+
+期待される出力例:
+
+```text
+my_coroutine demo server
+request_id: 1
+worker_thread_id: 12345
+runtime: Fiber + Scheduler + IOManager(epoll)
+request_line: GET / HTTP/1.1
+```
+
+この demo では、listen socket を non-blocking に設定し、`IOManager::addEvent()` で READ / WRITE event を登録します。  
+`epoll` でイベントが発火すると callback が scheduler に戻され、worker thread 上で HTTP response を生成します。
+
+
+
 ## 動作確認コード
 
 各モジュール配下に確認用の `test.cc` を配置しています。
