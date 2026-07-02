@@ -77,16 +77,16 @@ include_directories(
 # add_library(moczkrin_coroutine SHARED ${LIB_SOURCES})
 
 # 选项 B：打包成静态链接库  .a
-add_library(moczkrin_coroutine STATIC ${CORE_SOURCES})
-target_link_libraries(moczkrin_coroutine PUBLIC Threads::Threads ${CMAKE_DL_LIBS})
+add_library(mcoroutine STATIC ${CORE_SOURCES})
+target_link_libraries(mcoroutine PUBLIC Threads::Threads ${CMAKE_DL_LIBS})
 
 
 # 测试程序
 # add_executable(test_fiber src/fiber/test.cc)
-# target_link_libraries(test_fiber moczkrin_coroutine) # 让测试程序链接你刚生成的库
+# target_link_libraries(test_fiber mcoroutine) # 让测试程序链接你刚生成的库
 
 # Demo: shows Fiber + Scheduler + IOManager working together as a small HTTP server.
 add_executable(demo_http_server examples/main.cc)
-target_link_libraries(demo_http_server moczkrin_coroutine)
+target_link_libraries(demo_http_server mcoroutine)
 
 
