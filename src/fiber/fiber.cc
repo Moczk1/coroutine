@@ -1,4 +1,5 @@
 #include "fiber.h"
+#include <atomic>
 
 static bool debug = true;
 
@@ -82,8 +83,8 @@ namespace moczkrin
             pthread_exit(NULL);
         }
 
-        m_id = s_fiber_id.fetch_add(1);
-        s_fiber_count.fetch_add(1);
+        m_id = s_fiber_id.fetch_add(1,std::memory_order::relaxed);
+        s_fiber_count.fetch_add(1,std::memory_order::relaxed);
         if (debug)
             std::cout << "Fiber(): main id = " << m_id << std::endl;
     }
@@ -113,8 +114,8 @@ namespace moczkrin
         m_ctx.uc_stack.ss_size = m_stacksize;
         makecontext(&m_ctx, &Fiber::MainFunc, 0);
 
-        m_id = s_fiber_id.fetch_add(1);
-        s_fiber_count.fetch_add(1);
+        m_id = s_fiber_id.fetch_add(1, std::memory_order::relaxed);
+        s_fiber_count.fetch_add(1,std::memory_order::relaxed);
         if (debug)
             std::cout << "Fiber(): child id = " << m_id << std::endl;
     }
@@ -126,7 +127,7 @@ namespace moczkrin
      */
     Fiber::~Fiber()
     {
-        s_fiber_count.fetch_sub(1);
+        s_fiber_count.fetch_sub(1, std::memory_order::relaxed);
         if (m_stack)
         {
             free(m_stack);
