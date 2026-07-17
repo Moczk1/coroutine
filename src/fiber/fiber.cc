@@ -132,8 +132,6 @@ namespace moczkrin
         {
             free(m_stack);
         }
-        if (debug)
-            std::cout << "~Fiber(): id = " << m_id << std::endl;
     }
 
     /**
