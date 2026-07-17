@@ -85,8 +85,6 @@ namespace moczkrin
 
         m_id = s_fiber_id.fetch_add(1,std::memory_order::relaxed);
         s_fiber_count.fetch_add(1,std::memory_order::relaxed);
-        if (debug)
-            std::cout << "Fiber(): main id = " << m_id << std::endl;
     }
 
     /**
@@ -116,8 +114,6 @@ namespace moczkrin
 
         m_id = s_fiber_id.fetch_add(1, std::memory_order::relaxed);
         s_fiber_count.fetch_add(1,std::memory_order::relaxed);
-        if (debug)
-            std::cout << "Fiber(): child id = " << m_id << std::endl;
     }
 
     /**
